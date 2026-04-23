@@ -9,6 +9,7 @@ A Typst template (`dbrx.typ`) that reproduces the Databricks corporate slide dec
 ```
 dbrx.typ          # Template library — all slide functions, colors, layout constants
 example.typ       # Example presentation (import dbrx.typ and use its functions)
+rfq-kanban.typ    # RFQ Kanban architecture & MLOps presentation (10 slides)
 compile.sh        # Build script: bundles fonts + embeds git commit ID
 fonts/            # Barlow font family (5 weights) — required for compilation
 assets/           # Logos, background images, icons
@@ -119,6 +120,27 @@ Optional (used in example.typ only):
 - **Color pairing**: One secondary color + primary colors per slide; avoid mixing multiple secondaries
 - Content text in `content` blocks is typically rendered in `dbrx-charcoal`; titles in `dbrx-dark-navy`
 
+## Adding Page Numbers
+
+Page numbers are not built into `dbrx.typ`. Add them per-presentation via `set page(foreground:)` after the show rule. This uses Typst's foreground layer (rendered on top of every slide) with `place()` to position the counter in the bottom-right, vertically aligned with the logo. Page 1 (title cover) is typically skipped.
+
+```typ
+#show: dbrx-presentation.with(...)
+
+#set page(foreground: context {
+  let n = counter(page).get().first()
+  let total = counter(page).final().first()
+  if n > 1 {
+    place(
+      bottom + right,
+      dx: -1.28cm,
+      dy: -0.83cm,
+      text(size: 12pt, fill: dbrx-teal)[#n / #total]
+    )
+  }
+})
+```
+
 ## Key Conventions
 
 - Slide content uses Typst content blocks `[...]`, not strings `"..."`
@@ -126,3 +148,4 @@ Optional (used in example.typ only):
 - Internal helpers are prefixed with `_` (e.g., `_logo`, `_background-image`)
 - `.pdf` files and `.idea/` are gitignored
 - Commit messages are concise, imperative, describe the change
+- Do not add `\n` inside Mermaid node labels (e.g., `A[line1\nline2]`) — use short single-line labels instead
